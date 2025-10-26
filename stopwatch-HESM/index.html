@@ -1,0 +1,118 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Temporizadores</title>
+<style>
+  :root{
+    --blue:#16307a;
+    --blue-2:#0f2570;
+    --panel:#e9edff;
+    --panel-border:#3e4aa8;
+    --green:#37c94a;
+    --green-border:#1c8c2a;
+    --red:#e53935;
+    --red-border:#c62828;
+    --gray:#cbd5e1;
+    --gray-b:#94a3b8;
+    --muted:#6b7280;
+    --card:#f7fafc;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#fff;color:#111;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,sans-serif}
+  .topbar,.bottombar{background:var(--blue);height:42px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;letter-spacing:.8px}
+  header h1{margin:10px 0 0;text-align:center}
+
+  main{max-width:1100px;margin:0 auto;padding:16px}
+
+  /* ---- Selector inicial (Imagen 1) ---- */
+  .home-box{
+    margin-top:8px;border-left:12px solid var(--blue);border-right:12px solid var(--blue);
+    padding:18px;background:#f3f7f7
+  }
+  .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .pick{
+    background:#eef8f0;border:6px solid var(--blue);border-radius:12px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:26px 10px;cursor:pointer;user-select:none
+  }
+  .pick.right{background:#eef7f3}
+  .pick h2{font-size:40px;margin:0 0 6px}
+  .arrow{font-size:110px;line-height:1;margin-top:6px}
+  .up{color:#35c24a;text-shadow:0 3px 0 rgba(0,0,0,.2)}
+  .down{color:#e53935;text-shadow:0 3px 0 rgba(0,0,0,.2)}
+
+  /* ---- Área de tarjetas múltiples ---- */
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+  .card{
+    background:#fff;border:6px solid var(--blue);border-radius:18px;padding:14px;position:relative
+  }
+  .card .close{
+    position:absolute;right:10px;top:10px;border:4px solid var(--red-border);background:var(--red);color:#fff;
+    border-radius:10px;padding:6px 10px;font-weight:900;cursor:pointer
+  }
+  .label{font-weight:800;color:#0a1428;margin:2px 0 6px 2px}
+
+  /* ---- Display grande (Imágenes 2/3) ---- */
+  .panel{
+    margin:8px auto;background:var(--panel);border:8px solid var(--panel-border);border-radius:24px;padding:10px 20px;
+    text-align:center;max-width:940px
+  }
+  .time{font-size:96px;font-weight:900;letter-spacing:6px}
+  .ms{font-size:26px;font-weight:800;margin-left:8px;vertical-align:top}
+
+  .row{display:flex;gap:14px;justify-content:center;margin:14px 0}
+  .btn{
+    min-width:200px;padding:16px 18px;border-radius:16px;border:6px solid transparent;font-weight:900;font-size:28px;cursor:pointer;
+    box-shadow:inset 0 -6px 0 rgba(0,0,0,.09)
+  }
+  .btn.green{background:var(--green);border-color:var(--green-border);color:#06240a}
+  .btn.red{background:var(--red);border-color:var(--red-border);color:#fff}
+  .btn.gray{background:var(--gray);border-color:var(--gray-b);color:#0b1726}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+
+  /* ---- Teclado numérico (Imagen 3) ---- */
+  .keypad{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;max-width:940px;margin:0 auto}
+  .kbtn{padding:16px 0;border-radius:14px;border:6px solid #1b8f2a;background:#37c94a;color:#05210a;font-size:28px;font-weight:900;cursor:pointer;
+    box-shadow:inset 0 -6px 0 rgba(0,0,0,.09)}
+  .kbtn.dim{background:#b8c3cf;border-color:#8fa0b2;color:#0b1726}
+
+  .finish-banner{
+    display:none;margin:8px auto 0;max-width:940px;background:var(--red);border:6px solid var(--red-border);
+    color:#fff;font-weight:900;text-align:center;padding:8px;border-radius:16px;font-size:20px
+  }
+  .finish-banner.show{display:block}
+</style>
+</head>
+<body>
+  <div class="topbar">www.online-stopwatch.com</div>
+  <header><h1>Temporizadores</h1></header>
+
+  <main>
+    <!-- Pantalla "inicial": crea nuevas tarjetas tipo cronómetro o timer -->
+    <section class="home-box" aria-label="Nueva tarjeta">
+      <div class="home-grid">
+        <div class="pick" id="createStopwatch" role="button" tabindex="0" aria-label="Crear cronómetro">
+          <h2>Stopwatch</h2>
+          <div class="arrow up">⬆️</div>
+        </div>
+        <div class="pick right" id="createCountdown" role="button" tabindex="0" aria-label="Crear cuenta regresiva">
+          <h2>Countdown</h2>
+          <div class="arrow down">⬇️</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contenedor de múltiples tarjetas -->
+    <section class="cards" id="cards" aria-live="polite"></section>
+  </main>
+
+  <div class="bottombar"></div>
+
+  <!-- Beep embebido (WAV corto) -->
+  <audio id="beep" preload="auto" src="data:audio/wav;base64,UklGRkZWAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YSJWAAAAAAAI4Q+CF8QeiyW6KzoxQkY5V2hjjKmltnyQy13d4u2d5m+K1o0mT6v2t0Wcfrv1x3cY7r1nE4h9Vq2qQmZ5k2lq6k9zT7r0E0lV0k6hIh+2QmM1bqHf0yOe6qkOulbG3cNZfX0m4bXyqvV8oZxYkKk3a0w5F8o2cBd1lqQ9u2qg5vHhQmF1k5wQH9oQXQAAAB9qfFh0Y3yR8zqQWJY1H8p8kS0w9V2yN8b8kq9c3o3AAAA"></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
